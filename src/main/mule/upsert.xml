@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="5aeeef82-19dd-4f16-9ab5-10b21fdd0fc3" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="6a39f077-8506-450d-bd39-a2d6249615d0" >
+		<salesforce:basic-connection username="sivannarayanabodapati-2eav@force.com" password="Siva@0107" securityToken="F6iSppdyAQXaIYnsrRCLTkGgm" url="https://login.salesforce.com/services/Soap/u/58.0" />
+	</salesforce:sfdc-config>
+	<flow name="upsertFlow" doc:id="f8619c06-1e94-4a70-90fe-21f2d6b18547" >
+		<http:listener doc:name="Listener" doc:id="55f4414f-5339-4c95-8f57-7b0ac6be7255" config-ref="HTTP_Listener_config" path="/upsert"/>
+		<salesforce:query doc:name="Query" doc:id="7f9af35f-7169-4e56-b79a-a5330152a33a" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id, Name, Phone, BillingCity from Account]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="75a23b81-dd38-4b13-9bd6-f13fcba63ae3">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+ 
+
+[{
+    Name: "KIIIIIIIIIIIII",
+    BillingCity:  "HYYYYYYYYYY",
+    Phone:"77777777777777",
+    Id: payload[0].Id
+}]]]></ee:set-payload>
+			</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="sId"><![CDATA[payload.Id]]></ee:set-variable>
+				</ee:variables>
+		</ee:transform>
+		<salesforce:upsert objectType="Account" externalIdFieldName="Id" doc:name="Upsert" doc:id="cf176b09-c1d0-44f1-95a3-e3ba1c72d82f" config-ref="Salesforce_Config" />
+	</flow>
+</mule>
